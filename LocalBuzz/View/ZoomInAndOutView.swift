@@ -6,8 +6,11 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct ZoomInAndOutView: View {
+    
+    @Binding var region: MKCoordinateRegion
     
     var body: some View {
         // Zoom buttons overlay

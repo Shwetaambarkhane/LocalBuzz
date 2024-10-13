@@ -18,7 +18,9 @@ struct EventListView: View {
         Event(title: "Coffee Meetup", description: "Grab coffee with locals", location: CLLocationCoordinate2D(latitude: 37.7749, longitude: -122.4194), time: Date()),
         Event(title: "Street Art Tour", description: "Explore local street art", location: CLLocationCoordinate2D(latitude: 37.7849, longitude: -122.4094), time: Date().addingTimeInterval(3600)),
     ]
-
+    
+    @State private var indexOfEvent = 0
+    @State private var showEventEdit = false
     @State private var showEventCreation = false
 
     var body: some View {
@@ -28,15 +30,28 @@ struct EventListView: View {
                     MapView(region: $region, events: events)
                         .frame(height: 300)
                     
-                    ZoomInAndOutView()
+                    ZoomInAndOutView(region: $region)
                 }
                 
                 List(events) { event in
-                    VStack(alignment: .leading) {
-                        Text(event.title).font(.headline)
-                        Text(event.description).font(.subheadline)
-                        Text("Happening at \(event.time, formatter: eventFormatter)")
-                            .font(.caption)
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(event.title).font(.headline)
+                            Text(event.description).font(.subheadline)
+                            Text("Happening at \(event.time, formatter: eventFormatter)")
+                                .font(.caption)
+                        }
+                        Spacer()
+                        Button(action: {
+                            let index = events.firstIndex {
+                                $0.id == event.id
+                            }
+                            indexOfEvent = index ?? 0
+                            showEventEdit.toggle()
+                        }) {
+                            Image(systemName: "pencil")
+                                .padding()
+                        }
                     }
                 }
                 .navigationTitle("LocalBuzz")
@@ -51,8 +66,12 @@ struct EventListView: View {
                 }
             }
         }
-        .sheet(isPresented: $showEventCreation) {
-            EventCreationView(events: $events)
+        .sheet(isPresented: showEventEdit ? $showEventEdit : $showEventCreation) {
+            if showEventEdit {
+                EventCreationView(events: $events, indexOfEvent: indexOfEvent)
+            } else {
+                EventCreationView(events: $events)
+            }
         }
     }
 }
